@@ -31,7 +31,7 @@ type ProbeRef struct {
 }
 
 type TriggerDef struct {
-    ServiceMatch string
+    ServiceMatch string "service_match"
     Probes []*ProbeRef
 }
 
@@ -65,7 +65,7 @@ func GetConf(yamlPath string) (BlitzerConf, error) {
         log.Printf("Loaded main configuration from '%s'\n", yamlPath)
     }
 
-    // Load anything triggers.d/* files that describe individual triggers.
+    // Load the triggers.d/*.yaml files that describe individual triggers.
     triggerPaths, err := filepath.Glob(filepath.Join(filepath.Dir(yamlPath), "triggers.d", "*.yaml"))
     if err != nil { return BlitzerConf{}, err }
     if len(triggerPaths) == 0 {
@@ -78,10 +78,10 @@ func GetConf(yamlPath string) (BlitzerConf, error) {
         if err != nil { return BlitzerConf{}, err }
         yamlBytes, err = ioutil.ReadAll(ef)
         if err != nil { return BlitzerConf{}, err }
-        triggerConf := new(ProbeDef)
-        goyaml.Unmarshal(yamlBytes, triggerConf)
+        triggerDef := new(TriggerDef)
+        goyaml.Unmarshal(yamlBytes, triggerDef)
         if err != nil { return BlitzerConf{}, err }
-        conf.ProbeDefs = append(conf.ProbeDefs, triggerConf)
+        conf.TriggerDefs = append(conf.TriggerDefs, triggerDef)
 
         if conf.Debug == "yes" {
             log.Printf("Loaded trigger configuration from '%s'\n", triggerYamlPath)

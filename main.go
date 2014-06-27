@@ -8,9 +8,9 @@ import (
 var Config *BlitzerConf
 
 // Logs a Println-type message if we're in debug mode
-func D(s string) {
+func D(v ...interface{}) {
     if Config.Debug == "yes" {
-        log.Println(s)
+        log.Println(v...)
     }
 }
 
@@ -28,4 +28,8 @@ func main() {
         os.Exit(1)
     }
     Config = &c
+
+    matched_tds, err := MatchTriggerDefs(Event{ServiceName:"Search API",NewState:"triggered"})
+    if err != nil { log.Println(err) }
+    D("Matched TriggerDef count:", len(matched_tds))
 }

@@ -1,5 +1,5 @@
 ---
-service_match: '^API Search$'
+service_match: '^Search API$'
 probes:
     - name: 'ansible_ps_by_cpu'
       args:
