@@ -18,6 +18,7 @@ func (sup *Supervisor) Run() {
     _, err := GetProbeDefByName(sup.ProbeRef.Name)
     if err != nil { sup.barf(err) }
 
+    Df("Activating probe '%s'", sup.ProbeRef.Name)
     for sup.State == "active" {
         select {
         case msg := <- sup.CtrlInChan:
@@ -42,6 +43,7 @@ func (sup *Supervisor) barf(err error) {
 func (sup *Supervisor) processCtrlMsg(msg SupCtrlMsg) error {
     switch msg.Type {
     case "deactivate":
+        Df("Deactivating probe '%s'", sup.ProbeRef.Name)
         sup.Deactivate()
     }
     return nil

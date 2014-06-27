@@ -31,9 +31,8 @@ func main() {
         os.Exit(1)
     }
     D(inc.State)
-    time.Sleep(5000 * time.Millisecond)
-    D(inc.State)
+    time.Sleep(5 * time.Millisecond)
     inc.Deactivate()
-    time.Sleep(1000 * time.Millisecond)
+    time.Sleep(5 * time.Millisecond)
     D(inc.State)
 }
