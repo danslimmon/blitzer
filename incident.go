@@ -19,21 +19,7 @@ type Incident struct {
     State string
     ProbeRefs []*ProbeRef
     History []*HistoryEvent
-
-    // Communication channels with the incident's running ProbeSups.
-    //
-    // Each key is derived from ProbeRef.Hash(). The channels are defined
-    // as follows:
-    //
-    //  SupRsltChans: The ProbeSupervisor will send any new
-    //      ProbeResults on this channel.
-    //  SupCtrlMsgChans: This channel is used to send control messages
-    //      to a ProbeSupervisor, e.g. to activate or deactive it.
-    //  SupCtrlRespChans: This channel carries the responses to control
-    //      messages that were sent on SupCtrlMsgChans channels.
-    SupRsltChans map[string]chan *ProbeResult
-    SupCtrlMsgChans map[string]chan ProbeSupControlMsg
-    SupCtrlRespChans map[string]chan ProbeSupControlResp
+    Supervisors map[string]*Supervisor
 }
 
 func NewIncident(event *Event, probeRefs []*ProbeRef) (*Incident, error) {
@@ -44,11 +30,9 @@ func NewIncident(event *Event, probeRefs []*ProbeRef) (*Incident, error) {
 
     for _, pr := range inc.ProbeRefs {
         Df("Creating new supervisor for incident '%s'\n", event.ServiceName)
-        rsltChan, ctrlMsgChan, ctrlRespChan, err := NewSupervisor(pr)
+        sup, err := NewSupervisor(pr)
         if err != nil { return &Incident{}, nil }
-        inc.SupRsltChans[pr.Hash()] = rsltChan
-        inc.SupCtrlMsgChans[pr.Hash()] = ctrlMsgChan
-        inc.SupCtrlRespChans[pr.Hash()] = ctrlRespChan
+        inc.Supervisors[pr.Hash()] = sup
     }
 
     return inc, nil
