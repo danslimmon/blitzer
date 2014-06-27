@@ -4,8 +4,11 @@ import (
     "fmt"
     "log"
     "os"
+    "io"
+    "sort"
     "path/filepath"
     "io/ioutil"
+    "crypto/md5"
     "launchpad.net/goyaml"
 )
 
@@ -25,9 +28,25 @@ type BlitzerConf struct {
     ProbeDefs []*ProbeDef
 }
 
+// A reference to a ProbeDef, as included in a trigger.
 type ProbeRef struct {
     Name string
     Args map[string]string
+}
+// Deterministically hashes Name and Args to a unique string
+func (pr *ProbeRef) Hash() string {
+    h := md5.New()
+    argKeys := make([]string, 0)
+    for k, _ := range pr.Args { argKeys = append(argKeys, k) }
+    sort.Strings(argKeys)
+
+    io.WriteString(h, pr.Name)
+    for _, k := range argKeys {
+        y, _ := goyaml.Marshal(map[string]string{k:pr.Args[k]})
+        io.WriteString(h, string(y))
+    }
+
+    return(fmt.Sprintf("%x", h.Sum(nil)))
 }
 
 type TriggerDef struct {

@@ -29,7 +29,7 @@ func main() {
     }
     Config = &c
 
-    inc, err := NewIncident(Config.TriggerDefs[0].ProbeRefs)
+    inc, err := NewIncident(&Event{ServiceName:"Search API"}, Config.TriggerDefs[0].ProbeRefs)
     if err != nil {
         log.Println(err)
         os.Exit(1)
