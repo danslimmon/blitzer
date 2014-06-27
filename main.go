@@ -22,12 +22,7 @@ func Df(format string, v ...interface{}) {
 }
 
 func main() {
-    c, err := GetConf("etc/blitzer.yaml")
-    if err != nil {
-        log.Println(err)
-        os.Exit(1)
-    }
-    Config = &c
+    PopulateConfOrBarf("etc/blitzer.yaml")
 
     inc, err := NewIncident(&Event{ServiceName:"Search API"}, Config.TriggerDefs[0].ProbeRefs)
     if err != nil {

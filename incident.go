@@ -34,6 +34,7 @@ func NewIncident(event *Event, probeRefs []*ProbeRef) (*Incident, error) {
     inc.State = "active"
     inc.ProbeRefs = probeRefs
     inc.History = make([]*HistoryEvent, 0)
+    inc.Supervisors = make(map[string]*Supervisor)
 
     for _, pr := range inc.ProbeRefs {
         Df("Creating new supervisor for incident '%s'\n", event.ServiceName)

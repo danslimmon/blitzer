@@ -28,6 +28,28 @@ type BlitzerConf struct {
     ProbeDefs []*ProbeDef
 }
 
+func (c *BlitzerConf) Validate() error {
+    if len(c.TriggerDefs) < 1 {
+        return ConfigurationError{"No triggers defined in triggers.d"}
+    }
+    if len(c.ProbeDefs) < 1 {
+        return ConfigurationError{"No triggers defined in probes.d"}
+    }
+
+    for _, td := range c.TriggerDefs {
+        err := td.Validate()
+        if err != nil { return err }
+    }
+
+    for _, pd := range c.ProbeDefs {
+        err := pd.Validate()
+        if err != nil { return err }
+    }
+
+    return nil
+}
+
+
 // A reference to a ProbeDef, as included in a trigger.
 type ProbeRef struct {
     Name string
@@ -51,7 +73,18 @@ func (pr *ProbeRef) Hash() string {
 
 type TriggerDef struct {
     ServiceMatch string "service_match"
-    ProbeRefs []*ProbeRef
+    ProbeRefs []*ProbeRef "probes"
+    SourceFile string
+}
+
+func (td *TriggerDef) Validate() error {
+    if td.ServiceMatch == "" {
+        return ConfigurationError{fmt.Sprintf("No service_match specified for trigger in '%s'", td.SourceFile)}
+    }
+    if len(td.ProbeRefs) == 0 {
+        return ConfigurationError{fmt.Sprintf("No probes specified for trigger in '%s'", td.SourceFile)}
+    }
+    return nil
 }
 
 type AnsibleProbeDef struct {
@@ -64,9 +97,29 @@ type ProbeDef struct {
     Title string
     Type string
     Html string
+    SourceFile string
 
     // Types of probe we support
     Ansible AnsibleProbeDef
+}
+
+func (pd *ProbeDef) Validate() error {
+    if pd.Name == "" {
+        return ConfigurationError{fmt.Sprintf("No name specified for probe in '%s'", pd.SourceFile)}
+    }
+    if pd.Type == "" {
+        return ConfigurationError{fmt.Sprintf("No type specified for probe in '%s'", pd.SourceFile)}
+    }
+    return nil
+}
+
+func (pd *ProbeDef) PopulateDefaults() {
+    if pd.Title == "" {
+        pd.Title = pd.Name
+    }
+    if pd.Html == "" {
+        pd.Html = "{{.}}"
+    }
 }
 
 // Loads our configuration from the given path
@@ -101,6 +154,7 @@ func GetConf(yamlPath string) (BlitzerConf, error) {
         triggerDef := new(TriggerDef)
         goyaml.Unmarshal(yamlBytes, triggerDef)
         if err != nil { return BlitzerConf{}, err }
+        triggerDef.SourceFile = triggerYamlPath
         conf.TriggerDefs = append(conf.TriggerDefs, triggerDef)
 
         if conf.Debug == "yes" {
@@ -121,10 +175,12 @@ func GetConf(yamlPath string) (BlitzerConf, error) {
         if err != nil { return BlitzerConf{}, err }
         yamlBytes, err = ioutil.ReadAll(ef)
         if err != nil { return BlitzerConf{}, err }
-        probeConf := new(ProbeDef)
-        goyaml.Unmarshal(yamlBytes, probeConf)
+        probeDef := new(ProbeDef)
+        goyaml.Unmarshal(yamlBytes, probeDef)
         if err != nil { return BlitzerConf{}, err }
-        conf.ProbeDefs = append(conf.ProbeDefs, probeConf)
+        probeDef.SourceFile = probeYamlPath
+        probeDef.PopulateDefaults()
+        conf.ProbeDefs = append(conf.ProbeDefs, probeDef)
 
         if conf.Debug == "yes" {
             log.Printf("Loaded probe configuration from '%s'\n", probeYamlPath)
@@ -132,4 +188,18 @@ func GetConf(yamlPath string) (BlitzerConf, error) {
     }
 
     return *conf, nil
+}
+
+func PopulateConfOrBarf(yamlPath string) {
+    c, err := GetConf(yamlPath)
+    if err != nil {
+        log.Println(err)
+        os.Exit(1)
+    }
+    err = c.Validate()
+    if err != nil {
+        log.Println(err)
+        os.Exit(1)
+    }
+    Config = &c
 }

@@ -17,8 +17,7 @@ func (sup *Supervisor) Run() {
     sup.State = "active"
     _, err := GetProbeDefByName(sup.ProbeRef.Name)
     if err != nil { sup.barf(err) }
-    msg := <- sup.CtrlInChan
-    Df(msg.Type)
+    _ = <- sup.CtrlInChan
 }
 
 func (sup *Supervisor) Deactivate() {
