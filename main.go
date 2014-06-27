@@ -3,6 +3,7 @@ package main
 import (
     "os"
     "log"
+    "time"
 )
 
 var Config *BlitzerConf
@@ -30,6 +31,9 @@ func main() {
         os.Exit(1)
     }
     D(inc.State)
+    time.Sleep(5000 * time.Millisecond)
+    D(inc.State)
     inc.Deactivate()
+    time.Sleep(1000 * time.Millisecond)
     D(inc.State)
 }
