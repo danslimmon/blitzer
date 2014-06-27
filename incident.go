@@ -22,6 +22,13 @@ type Incident struct {
     Supervisors map[string]*Supervisor
 }
 
+func (inc *Incident) Deactivate() {
+    for _, sup := range inc.Supervisors {
+        sup.Deactivate()
+    }
+    inc.State = "inactive"
+}
+
 func NewIncident(event *Event, probeRefs []*ProbeRef) (*Incident, error) {
     inc := new(Incident)
     inc.State = "active"

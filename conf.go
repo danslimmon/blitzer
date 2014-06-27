@@ -61,6 +61,7 @@ type AnsibleProbeDef struct {
 
 type ProbeDef struct {
     Name string
+    Title string
     Type string
     Html string
 

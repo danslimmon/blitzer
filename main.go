@@ -35,4 +35,6 @@ func main() {
         os.Exit(1)
     }
     D(inc.State)
+    inc.Deactivate()
+    D(inc.State)
 }
