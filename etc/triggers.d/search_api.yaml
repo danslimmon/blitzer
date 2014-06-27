@@ -1,0 +1,7 @@
+---
+service_match: '^API Search$'
+probes:
+    - name: 'ansible_ps_by_cpu'
+      args:
+          host_pattern: '^api-01$'
+          line_count: 6

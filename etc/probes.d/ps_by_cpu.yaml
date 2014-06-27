@@ -1,8 +1,0 @@
----
-name: 'Top 5 processes by CPU usage'
-match_host: .*
-match_service: .*
-ansible:
-    module: 'shell'
-    args: 'ps auxww --sort=-pcpu | head -n 6'
-html: '<pre>{{.}}</pre>'

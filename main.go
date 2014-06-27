@@ -22,7 +22,7 @@ func Df(format string, v ...interface{}) {
 }
 
 func main() {
-    c, err := LoadConf("etc/blitzer.yaml")
+    c, err := GetConf("etc/blitzer.yaml")
     if err != nil {
         log.Println(err)
         os.Exit(1)

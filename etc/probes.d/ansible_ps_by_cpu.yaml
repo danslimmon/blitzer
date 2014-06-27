@@ -1,0 +1,7 @@
+---
+name: 'Top 5 processes by CPU usage'
+type: 'ansible'
+html: '<pre>{{.}}</pre>'
+ansible:
+    module: 'shell'
+    args: 'ps auxww --sort=-pcpu | head -n {{line_count}}'
