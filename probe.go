@@ -2,6 +2,11 @@ package main
 
 import (
     "fmt"
+    "strings"
+    "io"
+    "os/exec"
+    "io/ioutil"
+    "encoding/json"
 )
 
 type ProbeResult struct {
@@ -19,10 +24,40 @@ type AnsibleProbeRun struct {
     RsltChan chan *ProbeResult
 }
 
-func (pr *AnsibleProbeRun) Kickoff() error {
-    Df("Kicking off Ansible probe '%s' from file '%s'", pr.Def.Name, pr.Ref.SourceFile)
+func (run *AnsibleProbeRun) Kickoff() error {
+    Df("Kicking off Ansible probe '%s' from file '%s'", run.Def.Name, run.Ref.SourceFile)
+    playbookPath, err := run.createTempPlaybook()
+    if err != nil { return err }
+    extra := run.extraVarsStr()
+    cmdArgs := []string{
+        "-i",
+        Config.Ansible.Inventory,
+        "--extra-vars",
+        extra,
+        playbookPath,
+    }
+
+    Df("Executing ansible command: ansible-playbook %s\n", strings.Join(cmdArgs, " "))
+    _ = exec.Command("ansible-playbook", cmdArgs...)
     return nil
 }
+
+func (run *AnsibleProbeRun) createTempPlaybook() (string, error) {
+    f, err := ioutil.TempFile("", "blitzer_playbook_")
+    defer f.Close()
+    _, err = io.WriteString(f, fmt.Sprintf(`---
+- hosts: ~%s
+  tasks:
+    - %s: "%s"`, run.Ref.Args["host_pattern"], run.Def.Ansible.Module, run.Def.Ansible.Args))
+    if err != nil { return "", err }
+    return f.Name(), nil
+}
+
+func (run *AnsibleProbeRun) extraVarsStr() string {
+    rslt, _ := json.Marshal(run.Ref.Args)
+    return string(rslt)
+}
+
 
 func KickoffProbe(probeRef *ProbeRef, rsltChan chan *ProbeResult) error {
     probeDef, err := GetProbeDefByName(probeRef.Name)

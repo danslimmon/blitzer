@@ -3,4 +3,4 @@ addr: 127.0.0.1
 port: 80
 debug: yes
 ansible:
-    inventory: /etc/ansible/inventory
+    inventory: etc/ansible_inventory
