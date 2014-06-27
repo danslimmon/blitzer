@@ -54,6 +54,7 @@ func (c *BlitzerConf) Validate() error {
 type ProbeRef struct {
     Name string
     Args map[string]string
+    SourceFile string
 }
 // Deterministically hashes Name and Args to a unique string
 func (pr *ProbeRef) Hash() string {
@@ -98,6 +99,7 @@ type ProbeDef struct {
     Type string
     Html string
     SourceFile string
+    Interval int64 "interval_ms"
 
     // Types of probe we support
     Ansible AnsibleProbeDef
@@ -109,6 +111,9 @@ func (pd *ProbeDef) Validate() error {
     }
     if pd.Type == "" {
         return ConfigurationError{fmt.Sprintf("No type specified for probe in '%s'", pd.SourceFile)}
+    }
+    if pd.Interval == 0 {
+        return ConfigurationError{fmt.Sprintf("No interval_ms specified for probe in '%s'", pd.SourceFile)}
     }
     return nil
 }
@@ -154,7 +159,12 @@ func GetConf(yamlPath string) (BlitzerConf, error) {
         triggerDef := new(TriggerDef)
         goyaml.Unmarshal(yamlBytes, triggerDef)
         if err != nil { return BlitzerConf{}, err }
+
         triggerDef.SourceFile = triggerYamlPath
+        for _, pr := range triggerDef.ProbeRefs {
+            pr.SourceFile = triggerYamlPath
+        }
+
         conf.TriggerDefs = append(conf.TriggerDefs, triggerDef)
 
         if conf.Debug == "yes" {

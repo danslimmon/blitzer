@@ -1,5 +1,9 @@
 package main
 
+import (
+    "time"
+)
+
 type SupCtrlMsg struct {
     Type string
     Error error
@@ -14,13 +18,16 @@ type Supervisor struct {
 }
 
 func (sup *Supervisor) Run() {
+    Df("Activating probe '%s'", sup.ProbeRef.Name)
     sup.State = "active"
-    _, err := GetProbeDefByName(sup.ProbeRef.Name)
+    pd, err := GetProbeDefByName(sup.ProbeRef.Name)
     if err != nil { sup.barf(err) }
 
-    Df("Activating probe '%s'", sup.ProbeRef.Name)
+    ticker := time.Tick(time.Duration(pd.Interval) * time.Millisecond)
     for sup.State == "active" {
         select {
+        case _ = <- ticker:
+            sup.kickoffProbe()
         case msg := <- sup.CtrlInChan:
             sup.processCtrlMsg(msg)
         }   
@@ -48,6 +55,11 @@ func (sup *Supervisor) processCtrlMsg(msg SupCtrlMsg) error {
     }
     return nil
 }
+
+func (sup *Supervisor) kickoffProbe() error {
+    return KickoffProbe(sup.ProbeRef, sup.RsltChan)
+}
+
 
 func NewSupervisor(pr *ProbeRef) (*Supervisor, error) {
     sup := &Supervisor{

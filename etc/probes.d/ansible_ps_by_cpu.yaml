@@ -2,6 +2,7 @@
 name: 'ansible_ps_by_cpu'
 title: 'Top 5 processes by CPU usage'
 type: 'ansible'
+interval_ms: 500
 html: '<pre>{{.}}</pre>'
 ansible:
     module: 'shell'
