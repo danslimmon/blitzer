@@ -29,7 +29,10 @@ func main() {
     }
     Config = &c
 
-    matched_tds, err := MatchTriggerDefs(Event{ServiceName:"Search API",NewState:"triggered"})
-    if err != nil { log.Println(err) }
-    D("Matched TriggerDef count:", len(matched_tds))
+    inc, err := NewIncident(Config.TriggerDefs[0].ProbeRefs)
+    if err != nil {
+        log.Println(err)
+        os.Exit(1)
+    }
+    D(inc.State)
 }

@@ -32,7 +32,7 @@ type ProbeRef struct {
 
 type TriggerDef struct {
     ServiceMatch string "service_match"
-    Probes []*ProbeRef
+    ProbeRefs []*ProbeRef
 }
 
 type AnsibleProbeDef struct {
