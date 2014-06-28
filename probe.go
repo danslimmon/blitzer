@@ -14,6 +14,7 @@ type ProbeResult struct {
     Ref *ProbeRef
     Success bool
     Output string
+    Error error
 }
 
 type ProbeRun interface {
@@ -75,16 +76,62 @@ func (run *AnsibleProbeRun) extraVarsStr() string {
     return string(rslt)
 }
 
+// Converts the output from an ansible-playbook run to user-showable data 
+//
+// Normally, we just take the output of all 'shell' commands executed and
+// concatenate their stdout. If any command returned nonzero, its output
+// is replaced with an error message.
+func (run *AnsibleProbeRun) parseAnsibleOutput(output string) string {
+    type cmdRslt struct {
+        Cmd string
+        RC int8
+        Stdout string
+        Stderr string
+    }
+    type rsltPiece struct {
+        Hostname string
+        CmdRslt *cmdRslt
+    }
+
+    lines := strings.Split(output, "\n")
+    pieces := make([]rsltPiece, 0)
+    for _, line := range lines {
+        if strings.Index(line, "changed: [") != 0 { continue }
+        piece := rsltPiece{Hostname: "", CmdRslt: new(cmdRslt)}
+        piece.Hostname = line[strings.Index(line, "[")+1:strings.Index(line, "]")]
+        jsonBytes := []byte(line[strings.Index(line, "{"):])
+        if err := json.Unmarshal(jsonBytes, piece.CmdRslt); err != nil {
+            return fmt.Sprintf("Invalid JSON in Ansible output line: %s\n", line)
+        }
+        pieces = append(pieces, piece)
+    }
+
+    rsltLines := make([]string, 0)
+    for _, piece := range pieces {
+        rsltLines = append(rsltLines, fmt.Sprintf("%s ~~~~~~~~~~~~~~~~~~~~", piece.Hostname))
+        if piece.CmdRslt.RC == 0 {
+            rsltLines = append(rsltLines, piece.CmdRslt.Stdout)
+        } else {
+            rsltLines = append(rsltLines, fmt.Sprintf("<Command exited with return code %d and stderr as follows>\n%s", piece.CmdRslt.Stderr))
+        }
+    }
+
+    return strings.Join(rsltLines, "\n")
+}
+
 func (run *AnsibleProbeRun) makeResult(procErr error, outputBytes []byte) *ProbeResult {
     rslt := new(ProbeResult)
     rslt.Ref = run.Ref
     rslt.Success = true
-
     if procErr != nil {
         rslt.Success = false
+        rslt.Error = procErr
+        return rslt
     }
-    rslt.Output = string(outputBytes)
-    Df("Received output from probe '%s':\n===== BEGIN OUTPUT =====\n%s\n===== END OUTPUT =====\n", rslt.Ref.Name, rslt.Output)
+
+    output := run.parseAnsibleOutput(string(outputBytes))
+    rslt.Output = output
+
     return rslt
 }
 
