@@ -34,3 +34,8 @@ Implied probes:
   * graphite_diskio:db.*
   * du_rootstar:api.*
   * du_rootstar:db.*
+
+Caveats
+-----
+
+* This won't work if Ansible asks for any passwords

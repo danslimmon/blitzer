@@ -5,5 +5,8 @@ type: 'ansible'
 interval_ms: 500
 html: '<pre>{{.}}</pre>'
 ansible:
-    module: 'shell'
-    args: 'ps auxww --sort=-pcpu | head -n {{line_count}}'
+  tasks:
+    - shell: 'ps auxww -r | head -n {{line_count}}'
+      when: 'ansible_os_family == "Darwin"'
+    - shell: 'ps auxww --sort=-pcpu | head -n {{line_count}}'
+      when: 'ansible_os_family != "Darwin"'

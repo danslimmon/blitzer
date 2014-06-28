@@ -28,6 +28,8 @@ func (sup *Supervisor) Run() {
         select {
         case _ = <- ticker:
             sup.kickoffProbe()
+        case rslt := <- sup.RsltChan:
+            sup.processProbeResult(rslt)
         case msg := <- sup.CtrlInChan:
             sup.processCtrlMsg(msg)
         }   
@@ -53,6 +55,10 @@ func (sup *Supervisor) processCtrlMsg(msg SupCtrlMsg) error {
         Df("Deactivating probe '%s'", sup.ProbeRef.Name)
         sup.Deactivate()
     }
+    return nil
+}
+
+func (sup *Supervisor) processProbeResult(rslt *ProbeResult) error {
     return nil
 }
 

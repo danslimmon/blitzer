@@ -89,8 +89,7 @@ func (td *TriggerDef) Validate() error {
 }
 
 type AnsibleProbeDef struct {
-    Module string
-    Args string
+    Tasks []map[string]string
 }
 
 type ProbeDef struct {
