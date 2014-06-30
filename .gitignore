@@ -23,7 +23,7 @@ _testmain.go
 *.test
 
 # Editor swapfiles
-.*.sw?
+.*sw?
 *~
 
 # Binary

@@ -114,7 +114,7 @@ func (pd *ProbeDef) Validate() error {
         return ConfigurationError{fmt.Sprintf("No type specified for probe in '%s'", pd.SourceFile)}
     }
     if pd.Interval == 0 {
-        return ConfigurationError{fmt.Sprintf("No interval_ms specified for probe in '%s'", pd.SourceFile)}
+        return ConfigurationError{fmt.Sprintf("No interval specified for probe in '%s'", pd.SourceFile)}
     }
     return nil
 }
