@@ -1,9 +1,8 @@
 package main
 
 import (
-    "os"
     "log"
-    "time"
+    "github.com/zenazn/goji"
 )
 
 var Config *BlitzerConf
@@ -24,15 +23,6 @@ func Df(format string, v ...interface{}) {
 
 func main() {
     PopulateConfOrBarf("etc/blitzer.yaml")
-
-    inc, err := NewIncident(&Event{ServiceName:"Search API"}, Config.TriggerDefs[0].ProbeRefs)
-    if err != nil {
-        log.Println(err)
-        os.Exit(1)
-    }
-    D(inc.State)
-    time.Sleep(2000 * time.Millisecond)
-    inc.Deactivate()
-    _ = <- time.After(5000 * time.Millisecond)
-    D(inc.State)
+    goji.Get("/:incident_slug", GET_Incident)
+    goji.Serve()
 }
