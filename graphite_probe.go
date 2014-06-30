@@ -1,6 +1,7 @@
 package main
 
 import (
+    "fmt"
     "strings"
     "text/template"
 )
@@ -61,8 +62,13 @@ func (p *GraphiteProbe) makeGraphiteURL() (string, error) {
 }
 
 func (p *GraphiteProbe) makeQueryString() (string, error) {
-    tmpl, err := template.New("graphite_qs").Parse(p.Def.Graphite.QSTemplate)
+    qs_template, ok := p.Def.Args["qs_template"].(string)
+    if ! ok {
+        return "", ConfigurationError{fmt.Sprintf("Graphite probe definition in '%s' requires 'qs_template' parameter which must be a string", p.Def.SourceFile)}
+    }
+    tmpl, err := template.New("graphite_qs").Parse(qs_template)
     writer := &stringWriter{}
-    err = tmpl.Execute(writer, p.Ref.Args)
+    ctx := ProbeContext(p.Def, p.Ref)
+    err = tmpl.Execute(writer, ctx)
     return writer.S, err
 }

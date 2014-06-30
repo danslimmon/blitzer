@@ -85,10 +85,6 @@ func (td *TriggerDef) Validate() error {
     return nil
 }
 
-type GraphiteProbeDef struct {
-    QSTemplate string "qs_template"
-}
-
 type ProbeDef struct {
     Name string
     Title string
@@ -97,9 +93,6 @@ type ProbeDef struct {
     SourceFile string
     Interval int64
     Args map[string]interface{}
-
-    // Types of probe we support
-    Graphite GraphiteProbeDef
 }
 
 func (pd *ProbeDef) Validate() error {
