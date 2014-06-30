@@ -5,3 +5,6 @@ probes:
       args:
           host_pattern: '^api-01$'
           line_count: 6
+    - name: 'graphite_collectd_cpu'
+      args:
+          Hostname: 'api-01'

@@ -39,3 +39,10 @@ Caveats
 -----
 
 * This won't work if Ansible asks for any passwords
+
+Todo
+-----
+
+* Change probe def arguments to a map
+* Fold more stuff into template context
+* Find better way to write template results to string

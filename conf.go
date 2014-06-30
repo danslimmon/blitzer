@@ -89,6 +89,10 @@ type AnsibleProbeDef struct {
     Tasks []map[string]string
 }
 
+type GraphiteProbeDef struct {
+    QSTemplate string "qs_template"
+}
+
 type ProbeDef struct {
     Name string
     Title string
@@ -99,6 +103,7 @@ type ProbeDef struct {
 
     // Types of probe we support
     Ansible AnsibleProbeDef
+    Graphite GraphiteProbeDef
 }
 
 func (pd *ProbeDef) Validate() error {
