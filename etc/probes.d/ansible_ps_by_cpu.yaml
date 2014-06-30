@@ -4,7 +4,7 @@ title: 'Top 5 processes by CPU usage'
 type: 'ansible'
 interval: 1
 html: '<pre>{{.}}</pre>'
-ansible:
+args:
   tasks:
     - shell: 'ps auxww -r | head -n {{line_count}}'
       when: 'ansible_os_family == "Darwin"'

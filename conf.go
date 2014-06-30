@@ -85,10 +85,6 @@ func (td *TriggerDef) Validate() error {
     return nil
 }
 
-type AnsibleProbeDef struct {
-    Tasks []map[string]string
-}
-
 type GraphiteProbeDef struct {
     QSTemplate string "qs_template"
 }
@@ -100,9 +96,9 @@ type ProbeDef struct {
     Html string
     SourceFile string
     Interval int64
+    Args map[string]interface{}
 
     // Types of probe we support
-    Ansible AnsibleProbeDef
     Graphite GraphiteProbeDef
 }
 

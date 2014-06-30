@@ -41,3 +41,10 @@ func GetProbeDefByName(name string) (*ProbeDef, error) {
     }
     return nil, ConfigurationError{fmt.Sprintf("Cannot find probe with name '%s'", name)}
 }
+
+func ProbeContext(def *ProbeDef, ref *ProbeRef) map[string]interface{} {
+    ctx := make(map[string]interface{}, 0)
+    for k, v := range def.Args { ctx[k] = v }
+    for k, v := range ref.Args { ctx[k] = v }
+    return ctx
+}

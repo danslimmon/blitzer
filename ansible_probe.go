@@ -33,7 +33,8 @@ func (p *AnsibleProbe) Kickoff() error {
     playbookPath, err := p.createTempPlaybook()
     if err != nil { return err }
     p.playbookPath = playbookPath
-    extra := p.extraVarsStr()
+    ctx := ProbeContext(p.Def, p.Ref)
+    extra := p.extraVarsStr(ctx)
     cmdArgs := []string{
         "-vv",
         "-i",
@@ -57,7 +58,7 @@ func (p *AnsibleProbe) createTempPlaybook() (string, error) {
         {
             "hosts": strings.Join([]string{"~", p.Ref.Args["host_pattern"]}, ""),
             "sudo": false,
-            "tasks": p.Def.Ansible.Tasks,
+            "tasks": p.Def.Args["tasks"],
         },
     }
     pbBytes, _ := goyaml.Marshal(pbMap)
@@ -70,8 +71,8 @@ func (p *AnsibleProbe) deleteTempPlaybook() error {
     return os.Remove(p.playbookPath)
 }
 
-func (p *AnsibleProbe) extraVarsStr() string {
-    rslt, _ := json.Marshal(p.Ref.Args)
+func (p *AnsibleProbe) extraVarsStr(ctx map[string]interface{}) string {
+    rslt, _ := json.Marshal(ctx)
     return string(rslt)
 }
 

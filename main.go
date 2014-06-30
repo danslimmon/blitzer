@@ -33,6 +33,6 @@ func main() {
     D(inc.State)
     time.Sleep(2000 * time.Millisecond)
     inc.Deactivate()
-    time.Sleep(5000 * time.Millisecond)
+    _ = <- time.After(5000 * time.Millisecond)
     D(inc.State)
 }
