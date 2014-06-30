@@ -128,8 +128,9 @@ func (p *AnsibleProbe) makeResult(procErr error, outputBytes []byte) *ProbeResul
         return rslt
     }
 
+    rslt.Values = make(map[string]string, 0)
     output := p.parseAnsibleOutput(string(outputBytes))
-    rslt.Output = output
+    rslt.Values["Output"] = output
 
     return rslt
 }

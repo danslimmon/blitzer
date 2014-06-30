@@ -7,7 +7,7 @@ import (
 type ProbeResult struct {
     Ref *ProbeRef
     Success bool
-    Output string
+    Values map[string]string
     Error error
 }
 

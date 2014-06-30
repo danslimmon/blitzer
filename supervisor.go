@@ -59,7 +59,7 @@ func (sup *Supervisor) processCtrlMsg(msg SupCtrlMsg) error {
 }
 
 func (sup *Supervisor) processProbeResult(rslt *ProbeResult) error {
-    D(rslt.Output)
+    D(rslt.Values)
     return nil
 }
 

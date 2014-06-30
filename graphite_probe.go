@@ -23,6 +23,16 @@ func (p *GraphiteProbe) Kickoff() error {
 }
 
 func (p *GraphiteProbe) kickoff() {
-    // Execute template here
-    p.RsltChan <- &ProbeResult{}
+    rslt := new(ProbeResult)
+    rslt.Ref = p.Ref
+    rslt.Success = true
+
+    rslt.Values = make(map[string]string, 0)
+    rslt.Values["ImgURL"] = p.makeGraphiteURL()
+
+    p.RsltChan <- rslt
+}
+
+func (p *GraphiteProbe) makeGraphiteURL() string {
+    return "<fake graphite url>"
 }
