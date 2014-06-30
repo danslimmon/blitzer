@@ -10,7 +10,7 @@ import (
     "launchpad.net/goyaml"
 )
 
-type AnsibleProbeRun struct {
+type AnsibleProbe struct {
     Ref *ProbeRef
     Def *ProbeDef
     RsltChan chan *ProbeResult
@@ -18,36 +18,42 @@ type AnsibleProbeRun struct {
     playbookPath string
 }
 
-func (run *AnsibleProbeRun) Kickoff() error {
-    Df("Kicking off Ansible probe '%s' from file '%s'", run.Def.Name, run.Ref.SourceFile)
-    playbookPath, err := run.createTempPlaybook()
+func (p *AnsibleProbe) Init(ref *ProbeRef, def *ProbeDef, ch chan *ProbeResult) {
+    p.Ref = ref
+    p.Def = def
+    p.RsltChan = ch
+}
+
+func (p *AnsibleProbe) Kickoff() error {
+    Df("Kicking off Ansible probe '%s' from file '%s'", p.Def.Name, p.Ref.SourceFile)
+    playbookPath, err := p.createTempPlaybook()
     if err != nil { return err }
-    run.playbookPath = playbookPath
-    extra := run.extraVarsStr()
+    p.playbookPath = playbookPath
+    extra := p.extraVarsStr()
     cmdArgs := []string{
         "-vv",
         "-i",
         Config.Ansible.Inventory,
         "--extra-vars",
         extra,
-        run.playbookPath,
+        p.playbookPath,
     }
 
     Df("Executing ansible command: ansible-playbook %s\n", strings.Join(cmdArgs, " "))
     cmd := exec.Command("ansible-playbook", cmdArgs...)
-    go run.execAsync(cmd)
+    go p.execAsync(cmd)
     return nil
 }
 
-func (run *AnsibleProbeRun) createTempPlaybook() (string, error) {
+func (p *AnsibleProbe) createTempPlaybook() (string, error) {
     f, err := ioutil.TempFile("", "blitzer_playbook_")
     defer f.Close()
 
     pbMap := []map[string]interface{}{
         {
-            "hosts": strings.Join([]string{"~", run.Ref.Args["host_pattern"]}, ""),
+            "hosts": strings.Join([]string{"~", p.Ref.Args["host_pattern"]}, ""),
             "sudo": false,
-            "tasks": run.Def.Ansible.Tasks,
+            "tasks": p.Def.Ansible.Tasks,
         },
     }
     pbBytes, _ := goyaml.Marshal(pbMap)
@@ -56,21 +62,21 @@ func (run *AnsibleProbeRun) createTempPlaybook() (string, error) {
     return f.Name(), nil
 }
 
-func (run *AnsibleProbeRun) deleteTempPlaybook() error {
-    return os.Remove(run.playbookPath)
+func (p *AnsibleProbe) deleteTempPlaybook() error {
+    return os.Remove(p.playbookPath)
 }
 
-func (run *AnsibleProbeRun) extraVarsStr() string {
-    rslt, _ := json.Marshal(run.Ref.Args)
+func (p *AnsibleProbe) extraVarsStr() string {
+    rslt, _ := json.Marshal(p.Ref.Args)
     return string(rslt)
 }
 
-// Converts the output from an ansible-playbook run to user-showable data 
+// Converts the output from an ansible-playbook p to user-showable data 
 //
 // Normally, we just take the output of all 'shell' commands executed and
 // concatenate their stdout. If any command returned nonzero, its output
 // is replaced with an error message.
-func (run *AnsibleProbeRun) parseAnsibleOutput(output string) string {
+func (p *AnsibleProbe) parseAnsibleOutput(output string) string {
     type cmdRslt struct {
         Cmd string
         RC int8
@@ -108,9 +114,9 @@ func (run *AnsibleProbeRun) parseAnsibleOutput(output string) string {
     return strings.Join(rsltLines, "\n")
 }
 
-func (run *AnsibleProbeRun) makeResult(procErr error, outputBytes []byte) *ProbeResult {
+func (p *AnsibleProbe) makeResult(procErr error, outputBytes []byte) *ProbeResult {
     rslt := new(ProbeResult)
-    rslt.Ref = run.Ref
+    rslt.Ref = p.Ref
     rslt.Success = true
     if procErr != nil {
         rslt.Success = false
@@ -118,15 +124,15 @@ func (run *AnsibleProbeRun) makeResult(procErr error, outputBytes []byte) *Probe
         return rslt
     }
 
-    output := run.parseAnsibleOutput(string(outputBytes))
+    output := p.parseAnsibleOutput(string(outputBytes))
     rslt.Output = output
 
     return rslt
 }
 
-func (run *AnsibleProbeRun) execAsync(cmd *exec.Cmd) {
+func (p *AnsibleProbe) execAsync(cmd *exec.Cmd) {
     output, err := cmd.CombinedOutput()
-    rslt := run.makeResult(err, output)
-    run.RsltChan <- rslt
-    run.deleteTempPlaybook()
+    rslt := p.makeResult(err, output)
+    p.RsltChan <- rslt
+    p.deleteTempPlaybook()
 }

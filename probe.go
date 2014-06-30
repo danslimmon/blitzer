@@ -11,25 +11,25 @@ type ProbeResult struct {
     Error error
 }
 
-type ProbeRun interface {
+type Probe interface {
+    Init(*ProbeRef, *ProbeDef, chan *ProbeResult)
     Kickoff() error
 }
 
 func KickoffProbe(probeRef *ProbeRef, rsltChan chan *ProbeResult) error {
     probeDef, err := GetProbeDefByName(probeRef.Name)
     if err != nil { return err }
-    var run ProbeRun
+    var p Probe
     switch probeDef.Type {
     case "ansible":
-        run = &AnsibleProbeRun{
-            Ref: probeRef,
-            Def: probeDef,
-            RsltChan: rsltChan,
-        }
+        p = &AnsibleProbe{}
+    case "graphite":
+        p = &GraphiteProbe{}
     default:
         return ConfigurationError{fmt.Sprintf("Unknown probe type '%s'", probeDef.Type)}
     }
-    go run.Kickoff()
+    p.Init(probeRef, probeDef, rsltChan)
+    go p.Kickoff()
     return nil
 }
 
