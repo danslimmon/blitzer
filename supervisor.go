@@ -23,7 +23,7 @@ func (sup *Supervisor) Run() {
     pd, err := GetProbeDefByName(sup.ProbeRef.Name)
     if err != nil { sup.barf(err) }
 
-    ticker := time.Tick(time.Duration(pd.Interval) * time.Millisecond)
+    ticker := time.Tick(time.Duration(pd.Interval) * time.Second)
     for sup.State == "active" {
         select {
         case _ = <- ticker:

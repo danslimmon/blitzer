@@ -99,7 +99,7 @@ type ProbeDef struct {
     Type string
     Html string
     SourceFile string
-    Interval int64 "interval_ms"
+    Interval int64
 
     // Types of probe we support
     Ansible AnsibleProbeDef
