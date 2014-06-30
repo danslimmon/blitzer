@@ -1,7 +1,8 @@
 package main
 
-import (
-)
+type GraphiteConf struct {
+    BaseURL string
+}
 
 type GraphiteProbe struct {
     Ref *ProbeRef
@@ -17,5 +18,11 @@ func (p *GraphiteProbe) Init(ref *ProbeRef, def *ProbeDef, ch chan *ProbeResult)
 
 func (p *GraphiteProbe) Kickoff() error {
     Df("Kicking off Graphite probe '%s' from file '%s'", p.Def.Name, p.Ref.SourceFile)
+    go p.kickoff()
     return nil
+}
+
+func (p *GraphiteProbe) kickoff() {
+    // Execute template here
+    p.RsltChan <- &ProbeResult{}
 }

@@ -10,6 +10,10 @@ import (
     "launchpad.net/goyaml"
 )
 
+type AnsibleConf struct {
+    Inventory string
+}
+
 type AnsibleProbe struct {
     Ref *ProbeRef
     Def *ProbeDef
