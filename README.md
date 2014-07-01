@@ -112,3 +112,4 @@ Todo
 * Fold more stuff into template context
 * Find better way to write template results to string
 * Change `debug` to a boolean
+* Use httptest

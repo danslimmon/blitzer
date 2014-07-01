@@ -23,6 +23,7 @@ func Df(format string, v ...interface{}) {
 
 func main() {
     PopulateConfOrBarf("etc/blitzer.yaml")
-    goji.Get("/:incident_slug", GET_Incident)
+    goji.Post("/event/nagios", POST_Event_Nagios)
+    goji.Get("/:incident_slug", GET_IncidentSlug)
     goji.Serve()
 }
