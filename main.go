@@ -1,4 +1,4 @@
-package main
+package blitzer
 
 import (
     "log"
@@ -21,9 +21,16 @@ func Df(format string, v ...interface{}) {
     }
 }
 
-func main() {
-    PopulateConfOrBarf("etc/blitzer.yaml")
+func PopulateControllers() error {
     goji.Post("/event/nagios", POST_Event_Nagios)
     goji.Get("/:incident_slug", GET_IncidentSlug)
+    return nil
+}
+
+func main() {
+    PopulateConfOrBarf("etc/blitzer.yaml")
+    err := PopulateControllers()
+    if err != nil { log.Fatal(err) }
+
     goji.Serve()
 }

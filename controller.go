@@ -1,4 +1,4 @@
-package main
+package blitzer
 
 import (
     "fmt"
@@ -20,11 +20,11 @@ func (e WebError) Error() string {
 }
 
 func POST_Event_Nagios(c web.C, w http.ResponseWriter, r *http.Request) {
-    event, err := NewEventFromNagios(r)
+    _, err := NewEventFromNagios(r)
     if err != nil {
         Barf(c, w, r, &WebError{E: err})
     } else {
-        fmt.Fprintf(w, "Got event %s", event.ServiceName)
+        w.WriteHeader(204)
     }
 }
 

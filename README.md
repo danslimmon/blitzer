@@ -109,7 +109,7 @@ Caveats
 Todo
 =====
 
-* Fold more stuff into template context
-* Find better way to write template results to string
+* Find better way to write template results to string (strings.Writer?)
 * Change `debug` to a boolean
 * Use httptest
+* Is "middleware" what I want?
