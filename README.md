@@ -113,3 +113,4 @@ Todo
 * Change `debug` to a boolean
 * Use httptest
 * Is "middleware" what I want?
+* Add standard way of testing that an HTTP request body produces a given code
