@@ -4,6 +4,7 @@ import (
     "fmt"
     "log"
     "net/http"
+    "encoding/json"
     "github.com/zenazn/goji/web"
 )
 
@@ -33,15 +34,26 @@ func GET_IncidentSlug(c web.C, w http.ResponseWriter, r *http.Request) {
     fmt.Fprintf(w, "Hello, %s!", c.URLParams["incident_slug"])
 }
 
+func errorJSON(e error) string {
+    m := make(map[string]string, 0)
+    m["error"] = e.Error()
+    j, err := json.Marshal(m)
+    if err != nil {
+        log.Println("Error parsing error JSON:", e)
+        return `{"error":"Internal Server Error"}`
+    }
+    return string(j)
+}
+
 func Barf(c web.C, w http.ResponseWriter, r *http.Request, e error) {
     we, ok := e.(WebError)
     if ok {
         w.WriteHeader(we.Code)
         log.Println("Error:", we)
-        fmt.Fprintf(w, "Error %d: %s\n\n%s", we.Code, http.StatusText(we.Code), we)
+        fmt.Fprintf(w, errorJSON(we))
     } else {
         w.WriteHeader(500)
         log.Println("Error:", e)
-        fmt.Fprintf(w, "Internal Server Error", http.StatusText(500), e)
+        fmt.Fprintf(w, `{"error":"Internal Server Error"}`)
     }
 }

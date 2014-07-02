@@ -109,6 +109,5 @@ Caveats
 Todo
 =====
 
-* Use httptest
-* Is "middleware" what I want?
 * Add standard way of testing that an HTTP request body produces a given code
+* Have POST_Event_Nagios store new incident in Redis
