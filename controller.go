@@ -5,6 +5,7 @@ import (
     "log"
     "net/http"
     "encoding/json"
+    "html/template"
     "github.com/zenazn/goji/web"
 )
 
@@ -24,14 +25,20 @@ func (e WebError) Error() string {
 func POST_Event_Nagios(c web.C, w http.ResponseWriter, r *http.Request) {
     _, err := NewEventFromNagios(r)
     if err != nil {
-        Barf(c, w, r, err)
+        BarfJSON(c, w, r, err)
     } else {
         w.WriteHeader(204)
     }
 }
 
-func GET_IncidentSlug(c web.C, w http.ResponseWriter, r *http.Request) {
-    fmt.Fprintf(w, "Hello, %s!", c.URLParams["incident_slug"])
+func GET_Incident_IncidentSlug(c web.C, w http.ResponseWriter, r *http.Request) {
+    tmpl, err := template.ParseFiles("./views/incident_incidentslug.html")
+    if err != nil {
+        BarfJSON(c, w, r, err)
+        return
+    }
+    w.WriteHeader(200)
+    err = tmpl.Execute(w, nil)
 }
 
 func errorJSON(e error) string {
@@ -45,7 +52,7 @@ func errorJSON(e error) string {
     return string(j)
 }
 
-func Barf(c web.C, w http.ResponseWriter, r *http.Request, e error) {
+func BarfJSON(c web.C, w http.ResponseWriter, r *http.Request, e error) {
     we, ok := e.(WebError)
     if ok {
         w.WriteHeader(we.Code)

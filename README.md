@@ -109,5 +109,5 @@ Caveats
 Todo
 =====
 
-* Add standard way of testing that an HTTP request body produces a given code
 * Have POST_Event_Nagios store new incident in Redis
+* Test /incident/:incidentslug by parsing HTML

@@ -3,6 +3,8 @@ package blitzertest
 import (
     "fmt"
     "regexp"
+    "os"
+    "path/filepath"
     "io/ioutil"
     "encoding/json"
     "net/http/httptest"
@@ -96,4 +98,13 @@ func (re *ResponseExpectation) assertMatchBodyJSON(bodyStr string) error {
     }
 
     return nil
+}
+
+// If we're inside a test, make sure to get out of the test dir so that
+// templates can be found
+func ChdirToMain() {
+    Cwd, _ := filepath.Abs(".")
+    if filepath.Base(Cwd) == "test" {
+        os.Chdir("..")
+    }
 }

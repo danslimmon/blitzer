@@ -1,7 +1,6 @@
 package blitzer
 
 import (
-    "log"
     "net/http"
     "encoding/json"
     "io/ioutil"
@@ -33,7 +32,6 @@ func NewEventFromNagios(r *http.Request) (*Event, error) {
     event := new(Event)
     if ne.ServiceName == "" {
         e := WebError{Code: 400, Message: "Missing 'service' parameter"}
-        log.Println("wat")
         return &Event{}, e
     } else {
         event.ServiceName = ne.ServiceName
