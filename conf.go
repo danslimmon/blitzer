@@ -1,4 +1,4 @@
-package blitzer
+package main
 
 import (
     "fmt"

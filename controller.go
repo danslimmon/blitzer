@@ -1,4 +1,4 @@
-package blitzer
+package main
 
 import (
     "fmt"
@@ -23,12 +23,25 @@ func (e WebError) Error() string {
 }
 
 func POST_Event_Nagios(c web.C, w http.ResponseWriter, r *http.Request) {
-    _, err := NewEventFromNagios(r)
+    ev, err := NewEventFromNagios(r)
     if err != nil {
         BarfJSON(c, w, r, err)
-    } else {
-        w.WriteHeader(204)
+        return
     }
+
+    tds, err := MatchTriggerDefs(ev)
+    if err != nil {
+        BarfJSON(c, w, r, err)
+        return
+    }
+
+    inc, err := NewIncident(ev, tds)
+    if err != nil {
+        BarfJSON(c, w, r, err)
+        return
+    }
+    log.Println(inc.State)
+    w.WriteHeader(204)
 }
 
 func GET_Incident_IncidentSlug(c web.C, w http.ResponseWriter, r *http.Request) {

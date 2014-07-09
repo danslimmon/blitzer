@@ -1,4 +1,4 @@
-package blitzer
+package main
 
 import (
     "time"
@@ -29,12 +29,18 @@ func (inc *Incident) Deactivate() {
     inc.State = "inactive"
 }
 
-func NewIncident(event *Event, probeRefs []*ProbeRef) (*Incident, error) {
+func NewIncident(event *Event, triggerDefs []*TriggerDef) (*Incident, error) {
     inc := new(Incident)
     inc.State = "active"
-    inc.ProbeRefs = probeRefs
+    inc.ProbeRefs = make([]*ProbeRef, 0)
     inc.History = make([]*HistoryEvent, 0)
     inc.Supervisors = make(map[string]*Supervisor)
+
+    for _, td := range triggerDefs {
+        for _, pr := range td.ProbeRefs {
+            inc.ProbeRefs = append(inc.ProbeRefs, pr)
+        }
+    }
 
     for _, pr := range inc.ProbeRefs {
         Df("Creating new supervisor for incident '%s'\n", event.ServiceName)
