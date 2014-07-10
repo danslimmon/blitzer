@@ -8,7 +8,7 @@ import (
     "net/http"
     "net/http/httptest"
     "github.com/zenazn/goji"
-    "github.com/danslimmon/blitzer"
+    blitzer "github.com/danslimmon/blitzer"
 )
 
 func Test_GET_Incident_IncidentSlug(t *testing.T) {

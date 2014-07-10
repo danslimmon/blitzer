@@ -1,0 +1,8 @@
+---
+name: 'null'
+title: 'Null Probe'
+type: 'graphite'
+interval: 1
+html: '<img src="{{.ImgURL}}">'
+args:
+  qs_template: 'width=700&&height=250&from=-30minutes&until=now&target=alpha(aliasSub(aliasByMetric(sumSeriesWithWildcards(collectd.null.cpu-%5B0-7%5D.cpu-%7Bsystem%2Cuser%2Cinterrupt%2Cnice%2Csoftirq%2Csteal%2Cwait%2Cidle%7D%2C%202))%2C%20%27%5Ecpu-(.*)%27%2C%20%27%5C1%27)%2C%200.7)&area=stacked&areaMode=stacked&title=CPU%20Usage&yMin=0&colorList=purple%2Cgreen%2Cpink%2Cblue%2Cred%2Cyellow%2Cblack%2Cd0d0ff'

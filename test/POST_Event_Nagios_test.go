@@ -6,11 +6,12 @@ import (
     "net/http"
     "net/http/httptest"
     "github.com/zenazn/goji"
-    "github.com/danslimmon/blitzer"
+    blitzer "github.com/danslimmon/blitzer"
 )
 
 func Test_POST_Event_Nagios(t *testing.T) {
     blitzer.PopulateControllers()
+    blitzer.PopulateConfOrBarf("test/etc/blitzer.yaml")
 
     // Normal behavior (204 No Content)
     reqbody := strings.NewReader(`{"service":"foo","state":"CRITICAL"}`)

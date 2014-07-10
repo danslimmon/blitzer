@@ -1,0 +1,8 @@
+---
+addr: 127.0.0.1
+port: 80
+debug: yes
+ansible:
+    inventory: 'test/etc/ansible_inventory'
+graphite:
+    base_url: 'https://graphite.example.com/render'
