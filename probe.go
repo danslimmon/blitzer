@@ -21,8 +21,8 @@ func KickoffProbe(probeRef *ProbeRef, rsltChan chan *ProbeResult) error {
     if err != nil { return err }
     var p Probe
     switch probeDef.Type {
-    case "ansible":
-        p = &AnsibleProbe{}
+    case "shell":
+        p = &ShellProbe{}
     case "graphite":
         p = &GraphiteProbe{}
     default:

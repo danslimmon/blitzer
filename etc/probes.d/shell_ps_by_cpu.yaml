@@ -1,0 +1,8 @@
+---
+name: 'shell_ps_by_cpu'
+title: 'Top 5 processes by CPU usage'
+type: 'shell'
+interval: 1
+html: '<pre>{{.output}}</pre>'
+args:
+  command: 'ps auxww -r | head -n 6'

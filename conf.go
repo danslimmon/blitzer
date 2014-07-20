@@ -19,7 +19,6 @@ type BlitzerConf struct {
     Addr string
     Port int16
     Debug string
-    Ansible AnsibleConf
     Graphite GraphiteConf
     TriggerDefs []*TriggerDef
     ProbeDefs []*ProbeDef

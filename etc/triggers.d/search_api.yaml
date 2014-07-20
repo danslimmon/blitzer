@@ -1,10 +1,9 @@
 ---
 service_match: '^Search API$'
 probes:
-    - name: 'ansible_ps_by_cpu'
+    - name: 'shell_ps_by_cpu'
       args:
-          host_pattern: '^api-01$'
-          line_count: 6
+          hostname: 'api-01'
     - name: 'graphite_collectd_cpu'
       args:
-          Hostname: 'api-01'
+          hostname: 'api-01'
