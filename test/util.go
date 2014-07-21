@@ -6,6 +6,7 @@ import (
     "os"
     "path/filepath"
     "io/ioutil"
+    "reflect"
     "encoding/json"
     "net/http/httptest"
 )
@@ -85,10 +86,28 @@ func (re *ResponseExpectation) assertMatchBodyJSON(bodyStr string) error {
         }
     }
 
-    for k, expV := range expBodyMap {
-        if v, exist := foundBodyMap[k]; ! exist {
+    return assertDeepEqual(foundBodyMap, expBodyMap)
+}
+
+func assertDeepEqual(expected, found map[string]interface{}) error {
+    if ! reflect.DeepEqual(expected, found) {
+        return AssertionError{
+            Message: fmt.Sprintf("Body expected to contain %s but found %s", expected, found),
+        }
+    }
+    return nil
+}
+
+/*
+func assertDeepEqual(expected, found map[string]interface{}) error {
+    for k, expV := range expected {
+        if v, exist := found[k]; ! exist {
             return AssertionError{
                 Message: fmt.Sprintf("Body JSON expected to have key '%s' but it is missing", k),
+            }
+        } else if reflect.TypeOf(expected[k]) == reflect.Map {
+            if err := assertDeepEqual(expected[k], found[k]); err != nil {
+                return err
             }
         } else if v != expV {
             return AssertionError{
@@ -99,6 +118,7 @@ func (re *ResponseExpectation) assertMatchBodyJSON(bodyStr string) error {
 
     return nil
 }
+*/
 
 // If we're inside a test, make sure to get out of the test dir so that
 // templates can be found

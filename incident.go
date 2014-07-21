@@ -57,7 +57,7 @@ func (inc *Incident) writeProbeResult(pr *ProbeResult) error {
         Values: pr.Values,
     }
 
-    db, err := getDB()
+    db, err := GetDB()
     if err != nil { return err }
     err = db.WriteHistory(inc, he)
     if err != nil { return err }

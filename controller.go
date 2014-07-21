@@ -3,6 +3,7 @@ package main
 import (
     "fmt"
     "log"
+    "strconv"
     "net/http"
     "encoding/json"
     "html/template"
@@ -56,6 +57,49 @@ func GET_Incident_IncidentSlug(c web.C, w http.ResponseWriter, r *http.Request) 
         BarfJSON(c, w, r, err)
         return
     }
+}
+
+// AJAX endpoint returning recent history events for the given incident
+//
+// URL is like /incident/2014-07-21_incidentname/history/1234567890
+//
+// This would return all history events since the timestamp 1234567890 inclusive,
+// in a format like this:
+//
+//    {"result": [
+//        {"timestamp":1234567890","success":"true",probe_name:"whatever","values":{...}},
+//        {"timestamp":1234567894", ...},
+//        ...
+//    ]}
+func GET_Incident_IncidentSlug_History_Timestamp(c web.C, w http.ResponseWriter, r *http.Request) {
+    incSlug := c.URLParams["incident_slug"]
+    timestamp, err := strconv.ParseInt(c.URLParams["timestamp"], 10, 64)
+    if err != nil {
+        BarfJSON(c, w, r, WebError{Code: 400, Message: "Invalid timestamp after /history/"})
+        return
+    }
+
+    rslt := make(map[string][]HistoryEvent, 0)
+    db, err := GetDB()
+    if err != nil {
+        BarfJSON(c, w, r, err)
+        return
+    }
+    events, err := db.HistoryEventsSince(incSlug, timestamp)
+    if err != nil {
+        BarfJSON(c, w, r, err)
+        return
+    }
+    rslt["result"] = events
+
+    j, err := json.Marshal(rslt)
+    if err != nil {
+        BarfJSON(c, w, r, err)
+        return
+    }
+
+    w.WriteHeader(200)
+    w.Write(j)
 }
 
 func errorJSON(e error) string {

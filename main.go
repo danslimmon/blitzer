@@ -22,8 +22,11 @@ func Df(format string, v ...interface{}) {
 }
 
 func PopulateControllers() error {
-    goji.Post("/event/nagios", POST_Event_Nagios)
     goji.Get("/incident/:incident_slug", GET_Incident_IncidentSlug)
+    goji.Get("/incident/:incident_slug/history/:timestamp", GET_Incident_IncidentSlug_History_Timestamp)
+
+    goji.Post("/event/nagios", POST_Event_Nagios)
+
     return nil
 }
 
