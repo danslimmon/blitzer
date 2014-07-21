@@ -98,28 +98,6 @@ func assertDeepEqual(expected, found map[string]interface{}) error {
     return nil
 }
 
-/*
-func assertDeepEqual(expected, found map[string]interface{}) error {
-    for k, expV := range expected {
-        if v, exist := found[k]; ! exist {
-            return AssertionError{
-                Message: fmt.Sprintf("Body JSON expected to have key '%s' but it is missing", k),
-            }
-        } else if reflect.TypeOf(expected[k]) == reflect.Map {
-            if err := assertDeepEqual(expected[k], found[k]); err != nil {
-                return err
-            }
-        } else if v != expV {
-            return AssertionError{
-                Message: fmt.Sprintf("Body JSON expected to have [%s] = '%s', but it is '%s'", k, expV, v),
-            }
-        }
-    }
-
-    return nil
-}
-*/
-
 // If we're inside a test, make sure to get out of the test dir so that
 // templates can be found
 func ChdirToMain() {
