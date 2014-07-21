@@ -9,6 +9,11 @@ type HistoryEvent struct {
     ProbeResult *ProbeResult
 }
 
+type IncCtrlMsg struct {
+    Type string
+    Error error
+}
+
 // An Incident represents a set of probes and their result history.
 //
 // When an Incident is activated by an Event, its probes start running. When
@@ -18,14 +23,32 @@ type Incident struct {
     // "active" or "inactive"
     State string
     ProbeRefs []*ProbeRef
-    History []*HistoryEvent
     Supervisors map[string]*Supervisor
+    RsltChan chan *ProbeResult
+    Slug string
+
+    ctrlChan chan *IncCtrlMsg
+}
+
+func (inc *Incident) Run() {
+    for {
+        select {
+        case ctrlMsg := <- inc.ctrlChan:
+            if ctrlMsg.Type == "deactivate" {
+                Df("Stopping incident '%s'", inc.Slug)
+                return
+            }
+        case pr := <- inc.RsltChan:
+            Df("Saving probe result for '%s' to database", pr.Ref.Name)
+        }
+    }
 }
 
 func (inc *Incident) Deactivate() {
     for _, sup := range inc.Supervisors {
         sup.Deactivate()
     }
+    inc.ctrlChan <- &IncCtrlMsg{Type: "deactivate"}
     inc.State = "inactive"
 }
 
@@ -33,8 +56,9 @@ func NewIncident(event *Event, triggerDefs []*TriggerDef) (*Incident, error) {
     inc := new(Incident)
     inc.State = "active"
     inc.ProbeRefs = make([]*ProbeRef, 0)
-    inc.History = make([]*HistoryEvent, 0)
     inc.Supervisors = make(map[string]*Supervisor)
+    inc.RsltChan = make(chan *ProbeResult)
+    inc.Slug = "fake_slug"
 
     for _, td := range triggerDefs {
         for _, pr := range td.ProbeRefs {
@@ -44,10 +68,11 @@ func NewIncident(event *Event, triggerDefs []*TriggerDef) (*Incident, error) {
 
     for _, pr := range inc.ProbeRefs {
         Df("Creating new supervisor for incident '%s'\n", event.ServiceName)
-        sup, err := NewSupervisor(pr)
+        sup, err := NewSupervisor(pr, inc.RsltChan)
         if err != nil { return &Incident{}, nil }
         inc.Supervisors[pr.Hash()] = sup
     }
 
+    go inc.Run()
     return inc, nil
 }

@@ -12,7 +12,8 @@ type SupCtrlMsg struct {
 type Supervisor struct {
     State string
     ProbeRef *ProbeRef
-    RsltChan chan *ProbeResult
+    RsltInChan chan *ProbeResult
+    RsltOutChan chan *ProbeResult
     CtrlInChan chan SupCtrlMsg
     CtrlOutChan chan SupCtrlMsg
 }
@@ -28,7 +29,7 @@ func (sup *Supervisor) Run() {
         select {
         case _ = <- ticker:
             sup.kickoffProbe()
-        case rslt := <- sup.RsltChan:
+        case rslt := <- sup.RsltInChan:
             sup.processProbeResult(rslt)
         case msg := <- sup.CtrlInChan:
             sup.processCtrlMsg(msg)
@@ -59,19 +60,21 @@ func (sup *Supervisor) processCtrlMsg(msg SupCtrlMsg) error {
 }
 
 func (sup *Supervisor) processProbeResult(rslt *ProbeResult) error {
-    D(rslt.Values)
+    Df("Got result from probe '%s': %s", rslt.Ref.Name, rslt.Values)
+    sup.RsltOutChan <- rslt
     return nil
 }
 
 func (sup *Supervisor) kickoffProbe() error {
-    return KickoffProbe(sup.ProbeRef, sup.RsltChan)
+    return KickoffProbe(sup.ProbeRef, sup.RsltInChan)
 }
 
 
-func NewSupervisor(pr *ProbeRef) (*Supervisor, error) {
+func NewSupervisor(pr *ProbeRef, rsltOutChan chan *ProbeResult) (*Supervisor, error) {
     sup := &Supervisor{
         ProbeRef: pr,
-        RsltChan: make(chan *ProbeResult),
+        RsltInChan: make(chan *ProbeResult),
+        RsltOutChan: rsltOutChan,
         CtrlInChan: make(chan SupCtrlMsg),
         CtrlOutChan: make(chan SupCtrlMsg),
     }
