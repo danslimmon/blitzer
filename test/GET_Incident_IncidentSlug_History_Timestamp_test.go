@@ -63,4 +63,16 @@ func Test_GET_Incident_IncidentSlug_History_Timestamp(t *testing.T) {
         t.Fatal(err)
     }
 
+    // Empty listing (200 OK)
+    resp = httptest.NewRecorder()
+    req, err = http.NewRequest("GET", "/incident/test_incident_please_ignore/history/1234567894", nil)
+    if err != nil { t.Fatal(err) }
+
+    exp = ResponseExpectation{Code: 200, BodyJSON: `{"result":[]}`}
+
+    goji.DefaultMux.ServeHTTP(resp, req)
+    if err = exp.AssertMatch(resp); err != nil {
+        t.Fatal(err)
+    }
+
 }
