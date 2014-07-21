@@ -2,6 +2,7 @@ package main
 
 import (
     "log"
+    "net/http"
     "github.com/zenazn/goji"
 )
 
@@ -22,6 +23,7 @@ func Df(format string, v ...interface{}) {
 }
 
 func PopulateControllers() error {
+    goji.Get("/static/*", http.FileServer(http.Dir("/Users/dan/blitzer")))
     goji.Get("/incident/:incident_slug", GET_Incident_IncidentSlug)
     goji.Get("/incident/:incident_slug/history/:timestamp", GET_Incident_IncidentSlug_History_Timestamp)
 
