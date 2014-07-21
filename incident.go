@@ -1,15 +1,13 @@
 package main
 
 import (
-    "strings"
-    "encoding/json"
     "github.com/fzzy/radix/redis"
 )
 
 type HistoryEvent struct {
     Timestamp int64 `json:"timestamp"`
     ProbeName string `json:"probe_name"`
-    Success bool
+    Success bool `json:"success"`
     Values map[string]string `json:"values"`
 }
 
@@ -51,10 +49,6 @@ func (inc *Incident) Run() {
     }
 }
 
-func (inc *Incident) historyRedisKey() string {
-    return strings.Join([]string{"history", inc.Slug}, "_")
-}
-
 func (inc *Incident) writeProbeResult(pr *ProbeResult) error {
     he := HistoryEvent{
         Timestamp: pr.Timestamp,
@@ -63,9 +57,9 @@ func (inc *Incident) writeProbeResult(pr *ProbeResult) error {
         Values: pr.Values,
     }
 
-    prJSON, err := json.Marshal(he)
+    db, err := getDB()
     if err != nil { return err }
-    _, err = inc.RedisClient.Cmd("zadd", inc.historyRedisKey(), pr.Timestamp, string(prJSON)).Int()
+    err = db.WriteHistory(inc, he)
     if err != nil { return err }
     return nil
 }
@@ -85,10 +79,6 @@ func NewIncident(event *Event, triggerDefs []*TriggerDef) (*Incident, error) {
     inc.Supervisors = make(map[string]*Supervisor)
     inc.RsltChan = make(chan *ProbeResult)
     inc.Slug = "2014-07-21_fake_slug"
-
-    c, err := redis.Dial("tcp", "127.0.0.1:6379")
-    if err != nil { return &Incident{}, err }
-    inc.RedisClient = c
 
     for _, td := range triggerDefs {
         for _, pr := range td.ProbeRefs {
