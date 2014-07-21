@@ -2,6 +2,7 @@ package main
 
 import (
     "fmt"
+    "time"
     "strings"
     "text/template"
 )
@@ -39,6 +40,7 @@ func (p *GraphiteProbe) kickoff() {
     rslt.Ref = p.Ref
     rslt.Success = true
     rslt.Values = make(map[string]string, 0)
+    rslt.Timestamp = time.Now().Unix()
 
     url, err := p.makeGraphiteURL()
     if err != nil {
@@ -47,7 +49,7 @@ func (p *GraphiteProbe) kickoff() {
         p.RsltChan <- rslt
         return
     }
-    rslt.Values["ImgURL"] = url
+    rslt.Values["img_url"] = url
 
     p.RsltChan <- rslt
 }

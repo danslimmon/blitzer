@@ -2,6 +2,7 @@ package main
 
 import (
     "fmt"
+    "time"
     "strings"
     "os/exec"
     "text/template"
@@ -53,15 +54,16 @@ func (p *ShellProbe) makeResult(procErr error, outputBytes []byte) *ProbeResult 
     rslt := new(ProbeResult)
     rslt.Ref = p.Ref
     rslt.Success = true
+    rslt.Timestamp = time.Now().Unix()
+    rslt.Values = make(map[string]string, 0)
+    output := string(outputBytes)
+    rslt.Values["output"] = output
+
     if procErr != nil {
         rslt.Success = false
         rslt.Error = procErr
         return rslt
     }
-
-    rslt.Values = make(map[string]string, 0)
-    output := string(outputBytes)
-    rslt.Values["output"] = output
 
     return rslt
 }

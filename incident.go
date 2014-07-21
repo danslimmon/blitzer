@@ -1,13 +1,16 @@
 package main
 
 import (
-    "time"
+    "strings"
+    "encoding/json"
     "github.com/fzzy/radix/redis"
 )
 
 type HistoryEvent struct {
-    Time time.Time
-    ProbeResult *ProbeResult
+    Timestamp int64 `json:"timestamp"`
+    ProbeName string `json:"probe_name"`
+    Success bool
+    Values map[string]string `json:"values"`
 }
 
 type IncCtrlMsg struct {
@@ -42,14 +45,29 @@ func (inc *Incident) Run() {
             }
         case pr := <- inc.RsltChan:
             Df("Saving probe result for '%s' to database", pr.Ref.Name)
-            inc.writeProbeResult(pr)
+            err := inc.writeProbeResult(pr)
+            if err != nil { Df("Unable to write probe result for '%s' to database: %s", pr.Ref.Name, err) }
         }
     }
 }
 
-func (inc *Incident) writeProbeResult(pr *ProbeResult) {
-    v, _ := inc.RedisClient.Cmd("echo", "Daisy, daisy").Str()
-    D(v)
+func (inc *Incident) historyRedisKey() string {
+    return strings.Join([]string{"history", inc.Slug}, "_")
+}
+
+func (inc *Incident) writeProbeResult(pr *ProbeResult) error {
+    he := HistoryEvent{
+        Timestamp: pr.Timestamp,
+        ProbeName: pr.Ref.Name,
+        Success: pr.Success,
+        Values: pr.Values,
+    }
+
+    prJSON, err := json.Marshal(he)
+    if err != nil { return err }
+    _, err = inc.RedisClient.Cmd("zadd", inc.historyRedisKey(), pr.Timestamp, string(prJSON)).Int()
+    if err != nil { return err }
+    return nil
 }
 
 func (inc *Incident) Deactivate() {
@@ -66,7 +84,7 @@ func NewIncident(event *Event, triggerDefs []*TriggerDef) (*Incident, error) {
     inc.ProbeRefs = make([]*ProbeRef, 0)
     inc.Supervisors = make(map[string]*Supervisor)
     inc.RsltChan = make(chan *ProbeResult)
-    inc.Slug = "fake_slug"
+    inc.Slug = "2014-07-21_fake_slug"
 
     c, err := redis.Dial("tcp", "127.0.0.1:6379")
     if err != nil { return &Incident{}, err }

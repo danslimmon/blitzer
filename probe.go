@@ -8,6 +8,7 @@ type ProbeResult struct {
     Ref *ProbeRef
     Success bool
     Values map[string]string
+    Timestamp int64
     Error error
 }
 
