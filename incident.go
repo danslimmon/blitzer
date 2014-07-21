@@ -2,6 +2,7 @@ package main
 
 import (
     "time"
+    "github.com/fzzy/radix/redis"
 )
 
 type HistoryEvent struct {
@@ -26,6 +27,7 @@ type Incident struct {
     Supervisors map[string]*Supervisor
     RsltChan chan *ProbeResult
     Slug string
+    RedisClient *redis.Client
 
     ctrlChan chan *IncCtrlMsg
 }
@@ -40,8 +42,14 @@ func (inc *Incident) Run() {
             }
         case pr := <- inc.RsltChan:
             Df("Saving probe result for '%s' to database", pr.Ref.Name)
+            inc.writeProbeResult(pr)
         }
     }
+}
+
+func (inc *Incident) writeProbeResult(pr *ProbeResult) {
+    v, _ := inc.RedisClient.Cmd("echo", "Daisy, daisy").Str()
+    D(v)
 }
 
 func (inc *Incident) Deactivate() {
@@ -59,6 +67,10 @@ func NewIncident(event *Event, triggerDefs []*TriggerDef) (*Incident, error) {
     inc.Supervisors = make(map[string]*Supervisor)
     inc.RsltChan = make(chan *ProbeResult)
     inc.Slug = "fake_slug"
+
+    c, err := redis.Dial("tcp", "127.0.0.1:6379")
+    if err != nil { return &Incident{}, err }
+    inc.RedisClient = c
 
     for _, td := range triggerDefs {
         for _, pr := range td.ProbeRefs {
