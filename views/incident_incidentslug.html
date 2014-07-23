@@ -1,21 +1,21 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" ng-app="blitzer">
 
   <head>
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css"></script>
     <script src="/static/js/jquery.min.js"></script>
     <script src="/static/js/bootstrap.min.js"></script>
-    <link rel="stylesheet" href="/static/css/bootstrap.min.css"></script>
-    <script>
-      function initPage() {
-        $('div#updates').load('/incident/{{.IncidentSlug}}/history/0');
-      }
-
-      $(function(){initPage()});
+    <script src="/static/js/angular.min.js"></script>
+    <script src="/static/js/blitzer.js"></script>
     </script>
   </head>
 
   <body>
-    <div id="updates">
+    <div class="container" ng-controller="HistoryController as historyCtrl">
+      <div class="row" ng-repeat="ev in historyCtrl.events">
+        <h1>{{ev.probe_name}}</h1>
+        <pre>{{ev.values}}</pre>
+      </div>
     </div>
   </body>
 

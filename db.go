@@ -26,10 +26,10 @@ func (db *DB) WriteHistory(inc *Incident, he HistoryEvent) error {
 
 // Returns all events for the given incident since the given time.
 //
-// Events are returned in chronological order.
+// Events are returned in reverse chronological order.
 func (db *DB) HistoryEventsSince(incSlug string, timestamp int64) ([]HistoryEvent, error) {
     rslt := make([]HistoryEvent, 0)
-    blobs, err := db.RedisClient.Cmd("zrangebyscore", db.historyRedisKey(incSlug), timestamp, 1<<62).ListBytes()
+    blobs, err := db.RedisClient.Cmd("zrevrangebyscore", db.historyRedisKey(incSlug), 1<<62, timestamp).ListBytes()
     if err != nil { return rslt, err }
 
     for _, j := range blobs {

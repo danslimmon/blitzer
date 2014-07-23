@@ -1,12 +1,13 @@
 package main
 
 import (
+    "os"
     "fmt"
     "log"
+    "io/ioutil"
     "strconv"
     "net/http"
     "encoding/json"
-    "html/template"
     "github.com/zenazn/goji/web"
 )
 
@@ -46,17 +47,18 @@ func POST_Event_Nagios(c web.C, w http.ResponseWriter, r *http.Request) {
 }
 
 func GET_Incident_IncidentSlug(c web.C, w http.ResponseWriter, r *http.Request) {
-    tmpl, err := template.ParseFiles("./views/incident_incidentslug.html")
+    f, err := os.Open("/Users/dan/blitzer/views/incident_incidentslug.html")
     if err != nil {
         BarfJSON(c, w, r, err)
         return
     }
     w.WriteHeader(200)
-    err = tmpl.Execute(w, struct {IncidentSlug string}{c.URLParams["incident_slug"]})
+    outBytes, err := ioutil.ReadAll(f)
     if err != nil {
         BarfJSON(c, w, r, err)
         return
     }
+    w.Write(outBytes)
 }
 
 // AJAX endpoint returning recent history events for the given incident
@@ -64,11 +66,11 @@ func GET_Incident_IncidentSlug(c web.C, w http.ResponseWriter, r *http.Request) 
 // URL is like /incident/2014-07-21_incidentname/history/1234567890
 //
 // This would return all history events since the timestamp 1234567890 inclusive,
-// in a format like this:
+// in reverse chronological order, in a format like this:
 //
 //    {"result": [
-//        {"timestamp":1234567890","success":"true",probe_name:"whatever","values":{...}},
-//        {"timestamp":1234567894", ...},
+//        {"timestamp":1234567894","success":"true",probe_name:"whatever","values":{...}},
+//        {"timestamp":1234567890", ...},
 //        ...
 //    ]}
 func GET_Incident_IncidentSlug_History_Timestamp(c web.C, w http.ResponseWriter, r *http.Request) {
