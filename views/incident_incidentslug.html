@@ -2,8 +2,15 @@
 <html lang="en">
 
   <head>
+    <script src="/static/js/jquery.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css"></script>
     <script>
+      function initPage() {
+        $('div#updates').load('/incident/{{.IncidentSlug}}/history/0');
+      }
 
+      $(function(){initPage()});
     </script>
   </head>
 

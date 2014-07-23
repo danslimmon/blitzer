@@ -78,7 +78,7 @@ func NewIncident(event *Event, triggerDefs []*TriggerDef) (*Incident, error) {
     inc.ProbeRefs = make([]*ProbeRef, 0)
     inc.Supervisors = make(map[string]*Supervisor)
     inc.RsltChan = make(chan *ProbeResult)
-    inc.Slug = "2014-07-21_fake_slug"
+    inc.Slug = "2014-07-21_fake_incident"
 
     for _, td := range triggerDefs {
         for _, pr := range td.ProbeRefs {

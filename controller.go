@@ -52,7 +52,7 @@ func GET_Incident_IncidentSlug(c web.C, w http.ResponseWriter, r *http.Request) 
         return
     }
     w.WriteHeader(200)
-    err = tmpl.Execute(w, nil)
+    err = tmpl.Execute(w, struct {IncidentSlug string}{c.URLParams["incident_slug"]})
     if err != nil {
         BarfJSON(c, w, r, err)
         return
