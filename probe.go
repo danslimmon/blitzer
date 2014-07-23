@@ -5,6 +5,7 @@ import (
 )
 
 type ProbeResult struct {
+    Def *ProbeDef
     Ref *ProbeRef
     Success bool
     Values map[string]string

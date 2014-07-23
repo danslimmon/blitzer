@@ -7,6 +7,7 @@ import (
 type HistoryEvent struct {
     Timestamp int64 `json:"timestamp"`
     ProbeName string `json:"probe_name"`
+    ProbeType string `json:"probe_type"`
     Success bool `json:"success"`
     Values map[string]string `json:"values"`
 }
@@ -53,6 +54,7 @@ func (inc *Incident) writeProbeResult(pr *ProbeResult) error {
     he := HistoryEvent{
         Timestamp: pr.Timestamp,
         ProbeName: pr.Ref.Name,
+        ProbeType: pr.Def.Type,
         Success: pr.Success,
         Values: pr.Values,
     }

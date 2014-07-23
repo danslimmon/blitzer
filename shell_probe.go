@@ -53,6 +53,7 @@ func (p *ShellProbe) execAsync(cmd *exec.Cmd) {
 func (p *ShellProbe) makeResult(procErr error, outputBytes []byte) *ProbeResult {
     rslt := new(ProbeResult)
     rslt.Ref = p.Ref
+    rslt.Def = p.Def
     rslt.Success = true
     rslt.Timestamp = time.Now().Unix()
     rslt.Values = make(map[string]string, 0)

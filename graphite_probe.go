@@ -38,6 +38,7 @@ func (p *GraphiteProbe) Kickoff() error {
 func (p *GraphiteProbe) kickoff() {
     rslt := new(ProbeResult)
     rslt.Ref = p.Ref
+    rslt.Def = p.Def
     rslt.Success = true
     rslt.Values = make(map[string]string, 0)
     rslt.Timestamp = time.Now().Unix()
