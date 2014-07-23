@@ -12,7 +12,7 @@
 
   <body>
     <div class="container" ng-controller="HistoryController as historyCtrl">
-      <div class="row" ng-repeat="ev in historyCtrl.events">
+      <div class="row col-md-8 col-md-offset-2" ng-repeat="ev in historyCtrl.events">
         <h1>{{ev.probe_name}}</h1>
         <!-- 'shell' probe -->
         <pre ng-show="{{ev.probe_type === 'shell'}}">{{ev.values.output}}</pre>
