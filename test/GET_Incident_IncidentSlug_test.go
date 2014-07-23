@@ -21,7 +21,7 @@ func Test_GET_Incident_IncidentSlug(t *testing.T) {
     req, err := http.NewRequest("GET", "/incident/test_incident_please_ignore", nil)
     if err != nil { t.Fatal(err) }
 
-    exp := ResponseExpectation{Code: 200, BodyRegex: `(?s:<html.*<div id="updates)`}
+    exp := ResponseExpectation{Code: 200, BodyRegex: "ng-app"}
 
     goji.DefaultMux.ServeHTTP(resp, req)
     if err = exp.AssertMatch(resp); err != nil {

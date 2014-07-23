@@ -24,6 +24,7 @@ func Test_GET_Incident_IncidentSlug_History_Timestamp(t *testing.T) {
             Timestamp: 1234567890,
             Success: true,
             ProbeName: "null_probe",
+            ProbeType: "graphite",
             Values: make(map[string]string, 0),
         },
     )
@@ -34,6 +35,7 @@ func Test_GET_Incident_IncidentSlug_History_Timestamp(t *testing.T) {
             Timestamp: 1234567893,
             Success: true,
             ProbeName: "null_probe",
+            ProbeType: "graphite",
             Values: make(map[string]string, 0),
         },
     )
@@ -44,7 +46,7 @@ func Test_GET_Incident_IncidentSlug_History_Timestamp(t *testing.T) {
     req, err := http.NewRequest("GET", "/incident/test_incident_please_ignore/history/0", nil)
     if err != nil { t.Fatal(err) }
 
-    exp := ResponseExpectation{Code: 200, BodyJSON: `{"result":[{"timestamp":1234567893,"success":true,"probe_name":"null_probe","values":{}},{"timestamp":1234567890,"success":true,"probe_name":"null_probe","values":{}}]}`}
+    exp := ResponseExpectation{Code: 200, BodyJSON: `{"result":[{"timestamp":1234567893,"success":true,"probe_name":"null_probe","probe_type":"graphite","values":{}},{"timestamp":1234567890,"success":true,"probe_name":"null_probe","probe_type":"graphite","values":{}}]}`}
 
     goji.DefaultMux.ServeHTTP(resp, req)
     if err = exp.AssertMatch(resp); err != nil {
@@ -56,7 +58,7 @@ func Test_GET_Incident_IncidentSlug_History_Timestamp(t *testing.T) {
     req, err = http.NewRequest("GET", "/incident/test_incident_please_ignore/history/1234567891", nil)
     if err != nil { t.Fatal(err) }
 
-    exp = ResponseExpectation{Code: 200, BodyJSON: `{"result":[{"timestamp":1234567893,"success":true,"probe_name":"null_probe","values":{}}]}`}
+    exp = ResponseExpectation{Code: 200, BodyJSON: `{"result":[{"timestamp":1234567893,"success":true,"probe_name":"null_probe","probe_type":"graphite","values":{}}]}`}
 
     goji.DefaultMux.ServeHTTP(resp, req)
     if err = exp.AssertMatch(resp); err != nil {
