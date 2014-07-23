@@ -1,8 +1,6 @@
 package main
 
-import (
-    "github.com/fzzy/radix/redis"
-)
+var IncidentsByServiceName map[string]*Incident
 
 type HistoryEvent struct {
     Timestamp int64 `json:"timestamp"`
@@ -29,7 +27,7 @@ type Incident struct {
     Supervisors map[string]*Supervisor
     RsltChan chan *ProbeResult
     Slug string
-    RedisClient *redis.Client
+    IncitingServiceName string
 
     ctrlChan chan *IncCtrlMsg
 }
@@ -39,7 +37,8 @@ func (inc *Incident) Run() {
         select {
         case ctrlMsg := <- inc.ctrlChan:
             if ctrlMsg.Type == "deactivate" {
-                Df("Stopping incident '%s'", inc.Slug)
+                Df("Deactivating incident '%s'", inc.Slug)
+                inc.State = "inactive"
                 return
             }
         case pr := <- inc.RsltChan:
@@ -71,7 +70,6 @@ func (inc *Incident) Deactivate() {
         sup.Deactivate()
     }
     inc.ctrlChan <- &IncCtrlMsg{Type: "deactivate"}
-    inc.State = "inactive"
 }
 
 func NewIncident(event *Event, triggerDefs []*TriggerDef) (*Incident, error) {
@@ -81,6 +79,8 @@ func NewIncident(event *Event, triggerDefs []*TriggerDef) (*Incident, error) {
     inc.Supervisors = make(map[string]*Supervisor)
     inc.RsltChan = make(chan *ProbeResult)
     inc.Slug = "2014-07-21_fake_incident"
+    inc.IncitingServiceName = event.ServiceName
+    inc.ctrlChan = make(chan *IncCtrlMsg)
 
     for _, td := range triggerDefs {
         for _, pr := range td.ProbeRefs {
@@ -96,5 +96,20 @@ func NewIncident(event *Event, triggerDefs []*TriggerDef) (*Incident, error) {
     }
 
     go inc.Run()
+    if IncidentsByServiceName == nil {
+        IncidentsByServiceName = make(map[string]*Incident)
+    }
+    IncidentsByServiceName[inc.IncitingServiceName] = inc
+
     return inc, nil
+}
+
+// Returns the incident with the given slug
+//
+// If no such incident exists, `exists` will be false
+func GetIncidentByEvent(ev *Event) (*Incident, bool) {
+    if inc, ok := IncidentsByServiceName[ev.ServiceName]; ok {
+        return inc, true
+    }
+    return &Incident{}, false
 }

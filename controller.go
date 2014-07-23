@@ -31,18 +31,26 @@ func POST_Event_Nagios(c web.C, w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    tds, err := MatchTriggerDefs(ev)
-    if err != nil {
-        BarfJSON(c, w, r, err)
-        return
+    inc, exists := GetIncidentByEvent(ev)
+    switch {
+    case exists && inc.State == "active" && ev.State == "up":
+        // The service is back up
+        Df("Deactivating incident '%s' because service is back up", inc.Slug)
+        inc.Deactivate()
+    case !exists && ev.State == "down":
+        // Service is newly down
+        Df("Received a new 'down' alert for service '%s'", ev.ServiceName)
+        tds, err := MatchTriggerDefs(ev)
+        if err != nil {
+            BarfJSON(c, w, r, err)
+            return
+        }
+        _, err = NewIncident(ev, tds)
+        if err != nil {
+            BarfJSON(c, w, r, err)
+            return
+        }
     }
-
-    inc, err := NewIncident(ev, tds)
-    if err != nil {
-        BarfJSON(c, w, r, err)
-        return
-    }
-    log.Println(inc.State)
     w.WriteHeader(204)
 }
 
