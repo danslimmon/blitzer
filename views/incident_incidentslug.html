@@ -14,8 +14,10 @@
     <div class="container" ng-controller="HistoryController as historyCtrl">
       <div class="row" ng-repeat="ev in historyCtrl.events">
         <h1>{{ev.probe_name}}</h1>
-        <h3>{{ev.probe_type}}</h1>
-        <pre>{{ev.values}}</pre>
+        <!-- 'shell' probe -->
+        <pre ng-show="{{ev.probe_type === 'shell'}}">{{ev.values.output}}</pre>
+        <!-- 'graphite' probe -->
+        <img ng-src="{{ev.values.img_url}}" />
       </div>
     </div>
   </body>
