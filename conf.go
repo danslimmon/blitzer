@@ -19,7 +19,7 @@ type BlitzerConf struct {
     Addr string
     Port int16
     Debug string
-    Graphite GraphiteConf
+    Graphite *GraphiteConf
     TriggerDefs []*TriggerDef
     ProbeDefs []*ProbeDef
 }

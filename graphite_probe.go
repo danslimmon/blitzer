@@ -8,7 +8,7 @@ import (
 )
 
 type GraphiteConf struct {
-    BaseURL string
+    BaseURL string `yaml:"base_url"`
 }
 
 type GraphiteProbe struct {
