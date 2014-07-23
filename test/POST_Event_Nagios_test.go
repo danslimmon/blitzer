@@ -13,13 +13,13 @@ func Test_POST_Event_Nagios(t *testing.T) {
     blitzer.PopulateControllers()
     blitzer.PopulateConfOrBarf("test/etc/blitzer.yaml")
 
-    // Normal behavior (204 No Content)
+    // Normal behavior (200 OK with URL of new incident)
     reqbody := strings.NewReader(`{"service":"foo","state":"CRITICAL"}`)
     resp := httptest.NewRecorder()
     req, err := http.NewRequest("POST", "/event/nagios", reqbody)
     if err != nil { t.Fatal(err) }
 
-    exp := ResponseExpectation{Code: 204, BodyRegex: "^$"}
+    exp := ResponseExpectation{Code: 200, BodyRegex: `^{"slug":".*"}$`}
 
     goji.DefaultMux.ServeHTTP(resp, req)
     if err = exp.AssertMatch(resp); err != nil {
