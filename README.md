@@ -109,5 +109,6 @@ Caveats
 Todo
 =====
 
-* Have POST_Event_Nagios store new incident in Redis
-* Test /incident/:incidentslug by parsing HTML
+* Switch to real incident slugs
+* Use relative or configurable FS path for content
+* Add "new probes" button

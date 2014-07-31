@@ -1,5 +1,11 @@
 package main
 
+import (
+    "time"
+    "regexp"
+    "strings"
+)
+
 var IncidentsByServiceName map[string]*Incident
 
 type HistoryEvent struct {
@@ -72,13 +78,28 @@ func (inc *Incident) Deactivate() {
     inc.ctrlChan <- &IncCtrlMsg{Type: "deactivate"}
 }
 
+// Returns a new, unique incident slug based on the given event
+func MakeSlug(event *Event) string {
+    dateStr := time.Now().Format("2006-01-02")
+
+    slugName := strings.ToLower(event.ServiceName)
+    re := regexp.MustCompile("[^a-z0-9]")
+    slugName = string(re.ReplaceAll([]byte(slugName), []byte("_")))
+    re = regexp.MustCompile("_+")
+    slugName = string(re.ReplaceAll([]byte(slugName), []byte("_")))
+
+    slug := strings.Join([]string{dateStr, slugName}, "_")
+    slug = strings.Trim(slug, "_")
+    return slug
+}
+
 func NewIncident(event *Event, triggerDefs []*TriggerDef) (*Incident, error) {
     inc := new(Incident)
     inc.State = "active"
     inc.ProbeRefs = make([]*ProbeRef, 0)
     inc.Supervisors = make(map[string]*Supervisor)
     inc.RsltChan = make(chan *ProbeResult)
-    inc.Slug = "2014-07-21_fake_incident"
+    inc.Slug = MakeSlug(event)
     inc.IncitingServiceName = event.ServiceName
     inc.ctrlChan = make(chan *IncCtrlMsg)
 
